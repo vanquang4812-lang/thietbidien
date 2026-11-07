@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đang mở website...</title>
+</head>
+<body>
+  <p>Đang mở website...</p>
+  <script>
+    const destination = new URL("website.html" + location.search + location.hash, location.href);
+    location.replace(destination.href);
+  </script>
+  <noscript><a href="website.html">Mở website</a></noscript>
+</body>
+</html>
