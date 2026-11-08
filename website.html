@@ -358,6 +358,8 @@ input,select,textarea{font:inherit;color:inherit}
 .prod-detail__crumbs span:last-child{color:#64748b}
 .prod-detail__meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:13px}
 .prod-detail__content h2{font-size:26px;line-height:1.35;margin:9px 0 14px;overflow-wrap:anywhere}
+.prod-detail__variant{display:block;max-width:360px;margin:12px 0;font-size:13px;font-weight:700}
+.prod-detail__variant select{display:block;width:100%;margin-top:5px;border:1px solid #cfd5df;border-radius:6px;background:#fff;padding:10px 12px}
 .prod-detail__price{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin:0 0 16px}
 .prod-detail__price .product__price{font-size:26px;margin:0}
 .prod-detail__old-price{color:var(--muted);font-size:14px;text-decoration:line-through}
@@ -652,6 +654,15 @@ body.is-admin .product__edit{display:block}
 .adm-modal{background:#fff;border-radius:14px;width:100%;max-width:580px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .adm-modal h2{font-size:21px;margin-bottom:4px}
 .adm-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.adm-variant-set{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+.adm-variant-set__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.adm-variant-set__head h3{margin:0}
+.adm-variant-set__head p{font-size:12px;color:var(--muted);margin:2px 0 0}
+.adm-variants{display:grid;gap:8px;margin-top:10px}
+.adm-variant-row{display:grid;grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(90px,1fr)) auto;gap:8px;align-items:end}
+.adm-variant-row label{min-width:0;margin:0}
+.adm-variant-row .btn-danger{padding:8px 10px}
+@media (max-width:600px){.adm-variant-row{grid-template-columns:1fr 1fr}.adm-variant-row label:first-child{grid-column:1/-1}.adm-variant-row .btn-danger{justify-self:start}}
 @media (max-width:900px){.adm-cards{grid-template-columns:1fr}.adm-grid,.adm-row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -702,8 +713,15 @@ body.is-admin .product__edit{display:block}
   }
 
   /* ---------- thẻ sản phẩm (dùng ở nhiều trang) ---------- */
+  function productPriceInfo(product) {
+    const variants = Array.isArray(product.variants) ? product.variants.filter(variant => variant && variant.name) : [];
+    if (!variants.length) return { price: Number(product.price) || 0, oldPrice: Number(product.oldPrice) || 0, from: false };
+    const lowest = variants.reduce((current, variant) => Number(variant.price) < Number(current.price) ? variant : current);
+    return { price: Number(lowest.price) || 0, oldPrice: Number(lowest.oldPrice) || 0, from: true };
+  }
   function productCard(p) {
-    const off = p.oldPrice > p.price && p.price > 0 ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+    const pricing = productPriceInfo(p);
+    const off = pricing.oldPrice > pricing.price && pricing.price > 0 ? Math.round((1 - pricing.price / pricing.oldPrice) * 100) : 0;
     const mainImage = Array.isArray(p.images) ? (p.images.find(Boolean) || p.image || "") : (p.image || "");
     return `
     <article class="product">
@@ -715,7 +733,7 @@ body.is-admin .product__edit{display:block}
       <div class="product__line">${esc(p.line || "")}</div>
       <h3 class="product__name">${esc(p.name)}</h3>
       ${p.description ? `<p class="product__desc">${esc(p.description)}</p>` : ""}
-      <div class="product__price">${money(p.price)}</div>
+      <div class="product__price">${pricing.from ? "Từ " : ""}${money(pricing.price)}</div>
       <button class="product__add" data-add="${p.id}">Thêm vào giỏ</button>
     </article>`;
   }
@@ -839,11 +857,16 @@ body.is-admin .product__edit{display:block}
   let cart = [];
   try { cart = JSON.parse(localStorage.getItem("cart") || "[]"); } catch (e) { cart = []; }
   const saveCart = () => { try { localStorage.setItem("cart", JSON.stringify(cart)); } catch (e) { /* bỏ qua */ } };
+  const cartUnitPrice = item => {
+    const variant = item.variantId && item.p.variants && item.p.variants.find(option => String(option.id) === String(item.variantId));
+    if (variant) return Number(variant.price) || 0;
+    return item.unitPrice != null ? Number(item.unitPrice) || 0 : Number(item.p.price) || 0;
+  };
 
   function renderCart() {
-    const items = cart.map(c => ({ ...c, p: PRODUCTS.find(p => p.id === c.id) })).filter(c => c.p);
+    const items = cart.map((c, index) => ({ ...c, index, p: PRODUCTS.find(p => p.id === c.id) })).filter(c => c.p);
     $("#cartCount").textContent = items.reduce((a, c) => a + c.qty, 0);
-    const total = items.reduce((a, c) => a + c.qty * c.p.price, 0);
+    const total = items.reduce((a, c) => a + c.qty * cartUnitPrice(c), 0);
     $("#cartTotal").textContent = total > 0 ? money(total) : "Liên hệ";
     $("#drawerBody").innerHTML = items.length ? items.map(c => {
       const thumb = Array.isArray(c.p.images) ? (c.p.images.find(Boolean) || c.p.image || "") : (c.p.image || "");
@@ -851,17 +874,24 @@ body.is-admin .product__edit{display:block}
       <div class="ci">
         <div class="ci__img">${img(thumb, c.p.name, "ẢNH")}</div>
         <div>
-          <div class="ci__name">${esc(c.p.name)}</div>
-          <div class="ci__price">${money(c.p.price)}</div>
-          <div class="ci__qty"><button data-dec="${c.id}">−</button><span>${c.qty}</span><button data-inc="${c.id}">+</button></div>
+          <div class="ci__name">${esc(c.p.name)}${c.variantName ? `<br><small>${esc(c.variantName)}</small>` : ""}</div>
+          <div class="ci__price">${money(cartUnitPrice(c))}</div>
+          <div class="ci__qty"><button data-dec="${c.index}">−</button><span>${c.qty}</span><button data-inc="${c.index}">+</button></div>
         </div>
-        <button class="ci__del" data-del="${c.id}" aria-label="Xóa">✕</button>
+        <button class="ci__del" data-del="${c.index}" aria-label="Xóa">✕</button>
       </div>`;
     }).join("") : '<p class="drawer__empty">Giỏ hàng đang trống</p>';
   }
-  function addToCart(id) {
-    const f = cart.find(i => i.id === id);
-    if (f) f.qty++; else cart.push({ id, qty: 1 });
+  function addToCart(id, variantId) {
+    const product = PRODUCTS.find(item => item.id === id);
+    const variants = product && Array.isArray(product.variants) ? product.variants.filter(variant => variant && variant.name) : [];
+    const selected = variantId
+      ? variants.find(variant => String(variant.id) === String(variantId))
+      : (variants.length ? variants.reduce((lowest, variant) => Number(variant.price) < Number(lowest.price) ? variant : lowest) : null);
+    const selectedId = selected ? String(selected.id) : "";
+    const f = cart.find(item => item.id === id && String(item.variantId || "") === selectedId);
+    if (f) f.qty++;
+    else cart.push({ id, qty: 1, variantId: selectedId, variantName: selected ? selected.name : "", unitPrice: selected ? Number(selected.price) || 0 : Number(product && product.price) || 0 });
     saveCart(); renderCart(); toast("Đã thêm vào giỏ hàng");
   }
   function openDrawer(open) {
@@ -892,24 +922,24 @@ body.is-admin .product__edit{display:block}
     $("#checkoutBtn").addEventListener("click", () => {
       const items = cart.map(c => ({ ...c, p: PRODUCTS.find(p => p.id === c.id) })).filter(c => c.p);
       if (!items.length) return toast("Giỏ hàng đang trống");
-      const text = "Tôi muốn nhận báo giá các sản phẩm sau:\n" + items.map(c => `- ${c.p.name} (SL: ${c.qty})`).join("\n");
+      const text = "Tôi muốn nhận báo giá các sản phẩm sau:\n" + items.map(c => `- ${c.p.name}${c.variantName ? ` - ${c.variantName}` : ""} (${money(cartUnitPrice(c))}, SL: ${c.qty})`).join("\n");
       try { sessionStorage.setItem("quoteText", text); } catch (e) { /* bỏ qua */ }
       location.hash = "#/lien-he";
     });
 
     document.addEventListener("click", e => {
       const add = e.target.closest("[data-add]");
-      if (add) return addToCart(Number(add.dataset.add));
+      if (add) return addToCart(Number(add.dataset.add), add.dataset.variant || "");
       const inc = e.target.closest("[data-inc]");
-      if (inc) { cart.find(i => i.id === Number(inc.dataset.inc)).qty++; saveCart(); return renderCart(); }
+      if (inc) { cart[Number(inc.dataset.inc)].qty++; saveCart(); return renderCart(); }
       const dec = e.target.closest("[data-dec]");
       if (dec) {
-        const it = cart.find(i => i.id === Number(dec.dataset.dec));
-        it.qty--; if (it.qty <= 0) cart = cart.filter(i => i !== it);
+        const index = Number(dec.dataset.dec), item = cart[index];
+        item.qty--; if (item.qty <= 0) cart.splice(index, 1);
         saveCart(); return renderCart();
       }
       const del = e.target.closest("[data-del]");
-      if (del) { cart = cart.filter(i => i.id !== Number(del.dataset.del)); saveCart(); renderCart(); }
+      if (del) { cart.splice(Number(del.dataset.del), 1); saveCart(); renderCart(); }
     });
     renderCart();
   }
@@ -1027,7 +1057,7 @@ body.is-admin .product__edit{display:block}
     location.hash = "#/san-pham" + (v ? "?q=" + encodeURIComponent(v) : "");
   });
 
-  window.UI = { $, $$, esc, money, img, toast, productCard, applySite, setActive, closeMega, closeDrawer: () => openDrawer(false), renderCart };
+  window.UI = { $, $$, esc, money, img, toast, productCard, productPriceInfo, applySite, setActive, closeMega, closeDrawer: () => openDrawer(false), renderCart };
 })();
 
 </script>
@@ -1114,9 +1144,13 @@ body.is-admin .product__edit{display:block}
       const product = PRODUCTS.find(p => p.id === productId);
       const images = Array.isArray(product.images) && product.images.length ? product.images : [product.image || ""];
       const galleryImages = images.filter(Boolean);
+      const variants = Array.isArray(product.variants) ? product.variants.filter(variant => variant && variant.name) : [];
+      const selectedVariant = variants.length ? variants.reduce((lowest, variant) => Number(variant.price) < Number(lowest.price) ? variant : lowest) : null;
+      const initialPrice = selectedVariant ? Number(selectedVariant.price) || 0 : Number(product.price) || 0;
+      const initialOldPrice = selectedVariant ? Number(selectedVariant.oldPrice) || 0 : Number(product.oldPrice) || 0;
       const productCategory = CATEGORIES.find(category => category.id === product.cat);
       const categoryLabel = productCategory ? productCategory.name : product.cat;
-      const discount = product.oldPrice > product.price && product.price > 0 ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+      const discount = initialOldPrice > initialPrice && initialPrice > 0 ? Math.round((1 - initialPrice / initialOldPrice) * 100) : 0;
       $("#prodTitle").hidden = true;
       $("#prodCount").textContent = `Mã sản phẩm: ${product.id} • ${productCategory ? productCategory.name : product.cat}`;
       $("#prodCount").hidden = true;
@@ -1131,9 +1165,10 @@ body.is-admin .product__edit{display:block}
             <nav class="prod-detail__crumbs" aria-label="Đường dẫn"><a href="#/">Trang chủ</a><span>/</span><a href="#/san-pham?cat=${esc(product.cat)}">${esc(categoryLabel)}</a><span>/</span><span>${esc(product.name)}</span></nav>
             <div class="prod-detail__meta"><span>${esc(product.line || categoryLabel)}</span><span>Mã sản phẩm: ${esc(product.id)}</span></div>
             <h2>${esc(product.name)}</h2>
-            <div class="prod-detail__price"><strong class="product__price">${money(product.price)}</strong>${product.oldPrice > product.price && product.price > 0 ? `<del class="prod-detail__old-price">${money(product.oldPrice)}</del>` : ""}${discount ? `<span class="prod-detail__discount">-${discount}%</span>` : ""}</div>
+            ${variants.length ? `<label class="prod-detail__variant">Phân loại sản phẩm<select id="productVariant">${variants.map(variant => `<option value="${esc(variant.id)}"${variant.id === selectedVariant.id ? " selected" : ""}>${esc(variant.name)} · ${money(Number(variant.price) || 0)}</option>`).join("")}</select></label>` : ""}
+            <div class="prod-detail__price"><strong class="product__price" id="productPrice">${money(initialPrice)}</strong><del class="prod-detail__old-price" id="productOldPrice"${initialOldPrice > initialPrice ? "" : " hidden"}>${money(initialOldPrice)}</del><span class="prod-detail__discount" id="productDiscount"${discount ? "" : " hidden"}>-${discount}%</span></div>
             <div class="prod-detail__actions">
-              <button class="product__add" data-add="${esc(product.id)}">Thêm vào giỏ hàng</button>
+              <button class="product__add" data-add="${esc(product.id)}" data-variant="${selectedVariant ? esc(selectedVariant.id) : ""}">Thêm vào giỏ hàng</button>
               <a class="btn-blue btn-blue--sm" href="#/lien-he">Liên hệ báo giá</a>
             </div>
             <section class="prod-detail__section">
@@ -1149,6 +1184,19 @@ body.is-admin .product__edit{display:block}
           $$("#prodGrid .prod-detail__thumb").forEach(thumb => thumb.classList.toggle("active", thumb === button));
         }));
       }
+      const variantSelect = $("#productVariant");
+      if (variantSelect) variantSelect.addEventListener("change", () => {
+        const variant = variants.find(option => String(option.id) === variantSelect.value);
+        if (!variant) return;
+        const price = Number(variant.price) || 0, oldPrice = Number(variant.oldPrice) || 0;
+        const discountRate = oldPrice > price && price > 0 ? Math.round((1 - price / oldPrice) * 100) : 0;
+        $("#productPrice").textContent = money(price);
+        $("#productOldPrice").textContent = money(oldPrice);
+        $("#productOldPrice").hidden = !(oldPrice > price && price > 0);
+        $("#productDiscount").textContent = discountRate ? `-${discountRate}%` : "";
+        $("#productDiscount").hidden = !discountRate;
+        $("#prodGrid [data-add]").dataset.variant = String(variant.id);
+      });
       return;
     }
 
@@ -1263,7 +1311,7 @@ body.is-admin .product__edit{display:block}
    ====================================================================== */
 (function () {
   "use strict";
-  const { $, $$, esc, money, toast } = window.UI;
+  const { $, $$, esc, money, toast, productPriceInfo } = window.UI;
   const cloudEnabled = Boolean(CLOUD.supabaseUrl && CLOUD.publishableKey);
   const cloud = cloudEnabled && window.supabase && window.supabase.createClient
     ? window.supabase.createClient(CLOUD.supabaseUrl, CLOUD.publishableKey)
@@ -1534,6 +1582,12 @@ body.is-admin .product__edit{display:block}
     const p = isNew ? { cat: CATEGORIES[0].id, line: "", name: "", description: "", price: 0, oldPrice: 0, image: "", images: [""] } : PRODUCTS.find(x => x.id === id);
     if (!p) return;
     let images = Array.isArray(p.images) ? p.images.filter(Boolean).slice() : (p.image ? [p.image] : []);
+    let variants = Array.isArray(p.variants) ? p.variants.map((variant, index) => ({
+      id: String(variant.id || `variant-${index + 1}`),
+      name: String(variant.name || ""),
+      price: variant.price ?? "",
+      oldPrice: variant.oldPrice ?? ""
+    })) : [];
     const normalizeImages = list => [...new Set((list || []).map(v => String(v).trim()).filter(Boolean))];
     const ov = document.createElement("div");
     ov.className = "adm-ov"; ov.id = "admModal";
@@ -1549,6 +1603,10 @@ body.is-admin .product__edit{display:block}
         <label>Giá bán (đồng, 0 = Liên hệ)<input id="f_price" type="text" inputmode="numeric" value="${p.price || 0}"></label>
         <label>Giá gốc (0 = không giảm giá)<input id="f_old" type="text" inputmode="numeric" value="${p.oldPrice || 0}"></label>
       </div>
+      <section class="adm-variant-set">
+        <div class="adm-variant-set__head"><div><h3>Phân loại và giá</h3><p>Không bắt buộc. Thêm một dòng cho mỗi loại sản phẩm.</p></div><button type="button" class="btn-ghost" id="f_addVariant">+ Thêm phân loại</button></div>
+        <div class="adm-variants" id="f_variants"></div>
+      </section>
       <label>Mô tả sản phẩm<textarea id="f_desc" rows="4">${esc(p.description || "")}</textarea></label>
       <div class="adm-img">
         <div class="adm-prev" id="f_prev"></div>
@@ -1574,7 +1632,23 @@ body.is-admin .product__edit{display:block}
         : "<span>Chưa có ảnh</span>";
       $("#f_path").value = list.join(", ");
     };
+    const renderVariants = () => {
+      $("#f_variants").innerHTML = variants.map((variant, index) => `
+        <div class="adm-variant-row" data-variant-id="${esc(variant.id)}">
+          <label>Loại ${index + 1}<input type="text" data-variant-name value="${esc(variant.name)}" placeholder="Ví dụ: 7 inch"></label>
+          <label>Giá bán<input type="text" inputmode="numeric" data-variant-price value="${esc(variant.price)}" placeholder="0 = liên hệ"></label>
+          <label>Giá gốc<input type="text" inputmode="numeric" data-variant-old-price value="${esc(variant.oldPrice)}" placeholder="Không bắt buộc"></label>
+          <button type="button" class="btn-danger" data-remove-variant aria-label="Xóa loại ${index + 1}">Xóa</button>
+        </div>`).join("");
+    };
+    const readVariants = () => $$("#f_variants .adm-variant-row").map(row => ({
+      id: row.dataset.variantId,
+      name: $("[data-variant-name]", row).value,
+      price: $("[data-variant-price]", row).value,
+      oldPrice: $("[data-variant-old-price]", row).value
+    }));
     paint();
+    renderVariants();
     ov.addEventListener("mousedown", e => { if (e.target === ov) closeModal(); });
     $("#f_cancel").addEventListener("click", closeModal);
     $("#f_clear").addEventListener("click", () => { images = []; $("#f_files").value = ""; paint(); });
@@ -1588,6 +1662,18 @@ body.is-admin .product__edit{display:block}
         paint();
       } catch (err) { $("#f_err").textContent = "Không đọc được một hoặc nhiều ảnh này. Hãy thử file JPG/PNG khác."; }
     });
+    $("#f_addVariant").addEventListener("click", () => {
+      variants = readVariants();
+      variants.push({ id: `variant-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: "", price: "", oldPrice: "" });
+      renderVariants();
+    });
+    $("#f_variants").addEventListener("click", e => {
+      const remove = e.target.closest("[data-remove-variant]");
+      if (!remove) return;
+      const idToRemove = remove.closest(".adm-variant-row").dataset.variantId;
+      variants = readVariants().filter(variant => variant.id !== idToRemove);
+      renderVariants();
+    });
     if (!isNew) $("#f_del").addEventListener("click", async () => {
       if (!confirm("Xóa sản phẩm này? Không thể hoàn tác.")) return;
       const index = PRODUCTS.indexOf(p);
@@ -1600,13 +1686,24 @@ body.is-admin .product__edit{display:block}
       const name = $("#f_name").value.trim();
       if (!name) { $("#f_err").textContent = "Vui lòng nhập tên sản phẩm."; $("#f_name").focus(); return; }
       const finalImages = normalizeImages(images);
+      const variantRows = readVariants();
+      const incompleteVariant = variantRows.find(variant => !variant.name.trim() || variant.price.trim() === "");
+      if (incompleteVariant) { $("#f_err").textContent = "Vui lòng nhập tên loại và giá bán cho từng phân loại."; return; }
+      const finalVariants = variantRows.map(variant => ({
+        id: variant.id,
+        name: variant.name.trim(),
+        price: num(variant.price),
+        oldPrice: num(variant.oldPrice)
+      }));
+      const startingVariant = finalVariants.length ? finalVariants.reduce((lowest, variant) => variant.price < lowest.price ? variant : lowest) : null;
       const data = {
         cat: $("#f_cat").value,
         line: $("#f_line").value.trim(),
         name,
         description: $("#f_desc").value.trim(),
-        price: num($("#f_price").value),
-        oldPrice: num($("#f_old").value),
+        price: startingVariant ? startingVariant.price : num($("#f_price").value),
+        oldPrice: startingVariant ? startingVariant.oldPrice : num($("#f_old").value),
+        variants: finalVariants,
         image: finalImages[0] || "",
         images: finalImages
       };
@@ -1708,16 +1805,19 @@ body.is-admin .product__edit{display:block}
     state.page = Math.min(state.page, pages);
     const rows = list.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
     $("#pCount").textContent = `${list.length} sản phẩm`;
-    $("#pBody").innerHTML = rows.length ? rows.map(p => `
+    $("#pBody").innerHTML = rows.length ? rows.map(p => {
+      const pricing = productPriceInfo(p);
+      return `
       <tr>
         <td><span class="adm-thumb">${thumb(p.image)}</span></td>
         <td>${p.id}</td>
         <td><b>${esc(p.name)}</b><br><small>${esc(p.line || "")}</small></td>
         <td>${esc(catName(p.cat))}</td>
-        <td>${esc(money(p.price))}</td>
-        <td>${p.oldPrice ? esc(money(p.oldPrice)) : "–"}</td>
+        <td>${pricing.from ? "Từ " : ""}${esc(money(pricing.price))}</td>
+        <td>${pricing.oldPrice ? esc(money(pricing.oldPrice)) : "–"}</td>
         <td class="adm-ops"><button type="button" data-pe="${p.id}">Sửa</button><button type="button" class="danger" data-pd="${p.id}">Xóa</button></td>
-      </tr>`).join("") : '<tr><td colspan="7" class="adm-empty">Không có sản phẩm phù hợp.</td></tr>';
+      </tr>`;
+    }).join("") : '<tr><td colspan="7" class="adm-empty">Không có sản phẩm phù hợp.</td></tr>';
     $("#pPager").innerHTML = pages > 1
       ? `<button type="button" data-pg="-1" ${state.page <= 1 ? "disabled" : ""}>‹ Trước</button><span>Trang ${state.page} / ${pages}</span><button type="button" data-pg="1" ${state.page >= pages ? "disabled" : ""}>Sau ›</button>` : "";
   }
