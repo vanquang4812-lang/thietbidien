@@ -46,7 +46,7 @@ const ADMIN = { user: "admin", salt: "shop-v1", passHash: "a84839bf418b5465e7ea0
 /* ===================== LƯU TRỮ DÙNG CHUNG (SUPABASE) =====================
   Điền Project URL và Publishable/anon key trong Supabase Project Settings > API.
   Chỉ dùng khóa public; tuyệt đối không đặt service_role key trong website. */
-const CLOUD = { supabaseUrl: "", publishableKey: "", productBucket: "product-images" };
+const CLOUD = { supabaseUrl: "https://ygwvvymwffmyuektrkip.supabase.co", publishableKey: "sb_publishable_e0XUwmbwGRSbjE31sQCUvg_elAxIQtK", productBucket: "product-images" };
 
 /* ===================== DẢI LOGO HÃNG TRÊN CÙNG ===================== */
 const TOP_BRANDS = [
@@ -338,18 +338,42 @@ input,select,textarea{font:inherit;color:inherit}
 .product__line{font-size:12px;color:#6b7280;margin-bottom:2px}
 .product__name{font-size:15px;font-weight:700;line-height:1.35;min-height:41px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .product__desc{font-size:12px;line-height:1.6;color:var(--muted);margin:6px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left}
-.product__desc--detail{font-size:14px;color:#374151;line-height:1.8;display:block;min-height:0;margin:12px 0 0}
+.product__desc--detail{font-size:14px;color:#374151;line-height:1.8;display:block;min-height:0;margin:12px 0 0;white-space:pre-line}
 .product__price{color:#e5171f;font-weight:700;font-size:19px;margin-top:2px}
 .product__add{margin:10px auto 0;background:var(--blue);color:#fff;font-weight:600;font-size:13px;padding:8px 18px;border-radius:8px;opacity:0;transition:.2s}
 .product:hover .product__add{opacity:1}
 .product__add:hover{background:var(--blue-d)}
 .prod-detail .product__add{opacity:1;margin:0}
-.prod-detail{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;background:#fff;padding:20px;border-radius:12px;border:1px solid var(--line);margin-top:18px}
-.prod-detail__gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
-.prod-detail__image{width:100%;height:180px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#f5f7fb}
-.prod-detail__content h2{font-size:28px;line-height:1.3;margin-top:8px}
-.prod-detail__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;align-items:center}
-.prod-detail__empty{display:grid;place-items:center;background:#f6f8fb;border:1px dashed #cbd5e1;border-radius:10px;height:220px;color:var(--muted)}
+.prod-detail{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;background:#fff;padding:24px;border-radius:10px;border:1px solid var(--line);margin-top:18px;min-width:0}
+.prod-detail__gallery,.prod-detail__content{min-width:0}
+.prod-detail__main{display:grid;place-items:center;aspect-ratio:1/0.86;max-height:520px;overflow:hidden;background:#f7f8fa;border:1px solid var(--line);border-radius:8px}
+.prod-detail__image{display:block;width:100%;height:100%;object-fit:contain}
+.prod-detail__thumbs{display:flex;gap:10px;overflow-x:auto;padding:12px 1px 3px}
+.prod-detail__thumb{flex:0 0 70px;width:70px;height:70px;padding:3px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
+.prod-detail__thumb.active,.prod-detail__thumb:hover{border-color:var(--blue)}
+.prod-detail__thumb img{width:100%;height:100%;object-fit:contain}
+.prod-detail__empty{display:grid;place-items:center;aspect-ratio:1/0.86;background:#f6f8fb;border:1px dashed #cbd5e1;border-radius:8px;color:var(--muted)}
+.prod-detail__crumbs{display:flex;flex-wrap:wrap;gap:7px;color:var(--muted);font-size:12px;margin:2px 0 16px}
+.prod-detail__crumbs a{color:var(--blue-d)}
+.prod-detail__crumbs span:last-child{color:#64748b}
+.prod-detail__meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:13px}
+.prod-detail__content h2{font-size:26px;line-height:1.35;margin:9px 0 14px;overflow-wrap:anywhere}
+.prod-detail__price{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.prod-detail__price .product__price{font-size:26px;margin:0}
+.prod-detail__old-price{color:var(--muted);font-size:14px;text-decoration:line-through}
+.prod-detail__discount{background:#fff0ee;color:#d92d20;border-radius:4px;padding:3px 7px;font-size:12px;font-weight:700}
+.prod-detail__section{border-top:1px solid var(--line);padding-top:15px;margin-top:16px}
+.prod-detail__section h3{font-size:15px;margin-bottom:6px}
+.prod-detail__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.prod-detail__actions .product__add{padding:11px 20px;border-radius:6px}
+.prod-detail__actions .btn-blue{border-radius:6px}
+@media (max-width:700px){
+  .prod-detail{grid-template-columns:minmax(0,1fr);gap:18px;padding:14px;margin-top:12px}
+  .prod-detail__main,.prod-detail__empty{aspect-ratio:1/0.8;max-height:400px}
+  .prod-detail__content h2{font-size:22px}
+  .prod-detail__price .product__price{font-size:23px}
+  .prod-detail__actions>*{flex:1 1 100%;justify-content:center;text-align:center}
+}
 @media (hover:none){.product__add{opacity:1}}
 .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:44px 10px;background:#fff}
 
@@ -1089,25 +1113,42 @@ body.is-admin .product__edit{display:block}
     if (productId && PRODUCTS.some(p => p.id === productId)) {
       const product = PRODUCTS.find(p => p.id === productId);
       const images = Array.isArray(product.images) && product.images.length ? product.images : [product.image || ""];
-      $("#prodTitle").textContent = product.name;
-      $("#prodCount").textContent = `Mã sản phẩm: ${product.id} • ${catName(product.cat)}`;
-      $("#chips").innerHTML = `<a href="#/san-pham" class="active">Quay lại danh sách</a>`;
+      const galleryImages = images.filter(Boolean);
+      const productCategory = CATEGORIES.find(category => category.id === product.cat);
+      const categoryLabel = productCategory ? productCategory.name : product.cat;
+      const discount = product.oldPrice > product.price && product.price > 0 ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+      $("#prodTitle").hidden = true;
+      $("#prodCount").textContent = `Mã sản phẩm: ${product.id} • ${productCategory ? productCategory.name : product.cat}`;
+      $("#prodCount").hidden = true;
+      $("#chips").hidden = true;
       $("#prodGrid").innerHTML = `
         <article class="prod-detail">
           <div class="prod-detail__gallery">
-            ${images.map((src, index) => `<img src="${esc(src)}" alt="${esc(product.name)} ${index + 1}" class="prod-detail__image" />`).join("") || '<div class="prod-detail__empty">Chưa có ảnh</div>'}
+            ${galleryImages.length ? `<div class="prod-detail__main"><img id="productMainImage" src="${esc(galleryImages[0])}" alt="${esc(product.name)}" class="prod-detail__image"></div>` : '<div class="prod-detail__empty">Chưa có ảnh sản phẩm</div>'}
+            ${galleryImages.length > 1 ? `<div class="prod-detail__thumbs">${galleryImages.map((src, index) => `<button type="button" class="prod-detail__thumb${index === 0 ? " active" : ""}" data-product-image="${index}" aria-label="Xem ảnh ${index + 1}"><img src="${esc(src)}" alt=""></button>`).join("")}</div>` : ""}
           </div>
           <div class="prod-detail__content">
-            <div class="product__line">${esc(product.line || "")}</div>
+            <nav class="prod-detail__crumbs" aria-label="Đường dẫn"><a href="#/">Trang chủ</a><span>/</span><a href="#/san-pham?cat=${esc(product.cat)}">${esc(categoryLabel)}</a><span>/</span><span>${esc(product.name)}</span></nav>
+            <div class="prod-detail__meta"><span>${esc(product.line || categoryLabel)}</span><span>Mã sản phẩm: ${esc(product.id)}</span></div>
             <h2>${esc(product.name)}</h2>
-            <div class="product__price">${money(product.price)}</div>
-            <p class="product__desc product__desc--detail">${esc(product.description || "Chưa có mô tả sản phẩm.")}</p>
+            <div class="prod-detail__price"><strong class="product__price">${money(product.price)}</strong>${product.oldPrice > product.price && product.price > 0 ? `<del class="prod-detail__old-price">${money(product.oldPrice)}</del>` : ""}${discount ? `<span class="prod-detail__discount">-${discount}%</span>` : ""}</div>
             <div class="prod-detail__actions">
-              <button class="product__add" data-add="${product.id}">Thêm vào giỏ</button>
-              <a class="btn-blue btn-blue--sm" href="#/san-pham?cat=${esc(product.cat)}">Xem sản phẩm tương tự</a>
+              <button class="product__add" data-add="${esc(product.id)}">Thêm vào giỏ hàng</button>
+              <a class="btn-blue btn-blue--sm" href="#/lien-he">Liên hệ báo giá</a>
             </div>
+            <section class="prod-detail__section">
+              <h3>Thông tin sản phẩm</h3>
+              <p class="product__desc product__desc--detail">${esc(product.description || "Chưa có mô tả sản phẩm.")}</p>
+            </section>
           </div>
         </article>`;
+      const mainImage = $("#productMainImage");
+      if (mainImage) {
+        $$("#prodGrid [data-product-image]").forEach(button => button.addEventListener("click", () => {
+          mainImage.src = galleryImages[Number(button.dataset.productImage)];
+          $$("#prodGrid .prod-detail__thumb").forEach(thumb => thumb.classList.toggle("active", thumb === button));
+        }));
+      }
       return;
     }
 
@@ -1387,13 +1428,17 @@ body.is-admin .product__edit{display:block}
         if (!cloud) throw new Error("Không tải được thư viện Supabase. Kiểm tra kết nối Internet.");
         const { data: catalog, error } = await cloud.from("product_catalog").select("products").eq("id", "main").maybeSingle();
         if (error) throw error;
-        if (catalog && Array.isArray(catalog.products)) PRODUCTS.splice(0, PRODUCTS.length, ...catalog.products.map(normalizeProduct));
+        const cloudProducts = catalog && Array.isArray(catalog.products)
+          ? catalog.products.map(normalizeProduct)
+          : [];
+        if (cloudProducts.length || !localProducts.length) PRODUCTS.splice(0, PRODUCTS.length, ...cloudProducts);
+        else PRODUCTS.splice(0, PRODUCTS.length, ...localProducts);
         const { data: sessionData } = await cloud.auth.getSession();
         const user = sessionData.session && sessionData.session.user;
         if (user && await cloudIsAdmin(user.id)) {
           authMem = true;
           cloudAdminEmail = user.email || "";
-          if (!catalog && localProducts.length) await saveProducts();
+          if (!cloudProducts.length && localProducts.length) await saveProducts();
         } else if (user) {
           await cloud.auth.signOut();
         }
