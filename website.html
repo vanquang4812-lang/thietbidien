@@ -24,8 +24,8 @@ const SITE = {
   name: "TÊN CÔNG TY",                       // tên hiển thị ở logo, footer
   slogan: "Slogan - sửa sau",
   logo: "",                                  // vd "images/logo.png" (để "" dùng logo giữ chỗ)
-  hotline: "0900 000 000",
-  email: "info@example.com",
+  hotline: "038 348 1918",
+  email: "vanquang4812@gmail.com",
   address: "Địa chỉ trụ sở chính - sửa sau",
   office2Title: "VĂN PHÒNG ĐẠI DIỆN",
   office2Address: "Địa chỉ văn phòng đại diện - sửa sau",
@@ -347,7 +347,8 @@ input,select,textarea{font:inherit;color:inherit}
 .prod-detail{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;background:#fff;padding:24px;border-radius:10px;border:1px solid var(--line);margin-top:18px;min-width:0}
 .prod-detail__gallery,.prod-detail__content{min-width:0}
 .prod-detail__main{display:grid;place-items:center;aspect-ratio:1/1;max-height:520px;overflow:hidden;background:#f7f8fa;border:1px solid var(--line);border-radius:8px}
-.prod-detail__image{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain}
+.prod-detail__image{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;transform-origin:var(--zoom-x,50%) var(--zoom-y,50%);transition:transform .18s ease;pointer-events:none}
+@media (hover:hover) and (pointer:fine){.prod-detail__main:hover .prod-detail__image{transform:scale(2.2)}}
 .prod-detail__thumbs{display:flex;gap:10px;overflow-x:auto;padding:12px 1px 3px}
 .prod-detail__thumb{flex:0 0 70px;width:70px;height:70px;padding:3px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
 .prod-detail__thumb.active,.prod-detail__thumb:hover{border-color:var(--blue)}
@@ -557,18 +558,89 @@ input,select,textarea{font:inherit;color:inherit}
   .pcar__item{flex-basis:calc((100% - 40px)/3)}
 }
 @media (max-width:600px){
-  .product-grid{grid-template-columns:repeat(2,1fr)}
-  .tiles{grid-template-columns:repeat(2,1fr)}
-  .sec__banner b{font-size:22px}
+  html,body,#site-header,#view,#site-footer,#view>main{width:100%;max-width:100%;min-width:0}
+  .container{width:100%;max-width:100%;padding-left:12px;padding-right:12px}
+  .hero,.policies,.tiles,.sec{min-width:0}
+  .strip__inner{min-height:48px;gap:8px}
+  .strip__horn,.strip__burst{display:none}
+  .strip__promo b{font-size:16px}
+  .strip__promo small{font-size:10px}
+  .head{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:7px;align-items:center;padding-top:10px;padding-bottom:10px}
+  .logo{grid-column:1;grid-row:1;flex:none;min-width:0;gap:6px}
+  .logo__mark{width:34px;height:34px;font-size:19px;border-radius:8px}
+  .logo__text{min-width:0}
+  .logo__text b{max-width:110px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .logo__text small{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #loginBtn{grid-column:2;grid-row:1;padding:6px 6px;font-size:10px}
+  #cartBtn{grid-column:3;grid-row:1;padding:7px 6px;font-size:11px}
+  .burger{grid-column:4;grid-row:1;margin:0;padding:4px;font-size:23px}
+  .search{grid-column:1/-1;grid-row:2;order:0;flex-basis:auto;padding-left:12px;border-radius:9px}
+  .search input{padding:11px 0;font-size:14px}
+  .search button{width:36px;height:36px}
+  .nav__inner{padding-bottom:8px}
+  .catbtn{min-width:0;padding:11px 12px;border-radius:8px}
+  .menu>li>a{padding:10px 6px;font-size:13px}
+  .mega{margin-left:0;margin-right:0;border-radius:10px}
+  .mega__panel{padding:14px 12px}
+  .mp__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .mp__item{min-height:96px;padding:8px 5px;font-size:12px}
+  .mp__img{width:46px;height:46px}
+  .hero{margin-top:10px}
+  .slider{aspect-ratio:1.45/1;border-radius:10px}
+  .slide__ph{padding:0 20px;gap:6px}
+  .slide__ph b{font-size:22px}
+  .slide__ph span{font-size:13px;line-height:1.4}
+  .slider__nav{width:34px;height:34px;font-size:22px}
+  .policies{gap:8px;margin-top:10px}
+  .policy{padding:12px;gap:12px;border-radius:10px}
+  .policy__ic{width:54px;height:54px;font-size:25px}
+  .policy h3{font-size:16px;line-height:1.3}
+  .policy p{font-size:13px;line-height:1.45}
+  .tiles{gap:8px;padding:0 12px;background:transparent;border-radius:0}
+  .tile{min-width:0;height:112px;border-radius:8px}
+  .tile b{top:8px;left:8px;right:6px;font-size:12px}
+  .tile__img{width:58px;height:58px;right:5px;bottom:5px}
+  .sec{margin-top:20px}
+  .sec__banner{min-height:66px;border-radius:9px 9px 0 0;padding:8px}
+  .sec__banner b{font-size:18px;text-align:center;line-height:1.25}
+  .sec__banner small{display:none}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
+  .product{min-width:0;padding:10px 8px 12px}
+  .product__img{margin:4px 2px 8px}
+  .product__name{font-size:13px;min-height:36px}
+  .product__price{font-size:16px}
+  .product__badge{top:10px;left:5px;padding:3px 8px;font-size:11px}
+  .product__add{width:100%;margin-top:8px;padding:8px 5px;font-size:12px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .job-grid{grid-template-columns:1fr}
   .post__title{font-size:21px}
-  .footer__grid{grid-template-columns:1fr}
-  .chat{width:calc(100% - 28px)}
+  .post__head{padding:18px 16px 8px}
+  .post__text{padding:0 16px 16px}
+  .footer__grid{grid-template-columns:1fr 1fr;gap:18px;padding-top:28px}
+  .footer__grid>div:first-child{grid-column:1/-1}
+  body{padding-bottom:104px}
+  .chat{width:min(220px,calc(100% - 20px));right:10px}
   .chat__bubble{display:none}
-  .pill-float{min-width:0;padding-right:16px}
-  .pill-float b{font-size:14px}
-  .pcar__item{flex-basis:calc((100% - 20px)/2)}
+  .float-left{left:10px;bottom:52px;flex-direction:row;gap:8px}
+  .pill-float{width:40px;height:40px;min-width:40px;padding:2px;justify-content:center}
+  .pill-float__ic{width:32px;height:32px}
+  .pill-float b{display:none}
+  .totop{left:auto;right:12px;bottom:66px;width:40px;height:40px}
+  .pcar{padding:0 30px}
+  .pcar__item{flex-basis:calc((100% - 12px)/2)}
+  .partners{padding:36px 12px 28px}
+  .page-title{font-size:22px;margin-top:18px}
+  .contact{gap:24px;padding-top:28px}
+  .contact h2{font-size:21px;margin-bottom:14px}
+  .map{height:280px;margin-top:18px}
   .btn-blue{padding:11px 12px}
+}
+@media (max-width:360px){
+  .head{grid-template-columns:minmax(0,1fr) auto auto}
+  #loginBtn{grid-column:1/-1;grid-row:2;justify-self:end}
+  #cartBtn{grid-column:2;grid-row:1}
+  .burger{grid-column:3;grid-row:1}
+  .search{grid-row:3}
 }
 
 
@@ -1057,6 +1129,28 @@ body.is-admin .product__edit{display:block}
     location.hash = "#/san-pham" + (v ? "?q=" + encodeURIComponent(v) : "");
   });
 
+  document.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse" || !(e.target instanceof Element)) return;
+    const frame = e.target.closest(".prod-detail__main");
+    const image = frame && $("img", frame);
+    if (!image) return;
+    const bounds = frame.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, (e.clientX - bounds.left) / bounds.width * 100));
+    const y = Math.max(0, Math.min(100, (e.clientY - bounds.top) / bounds.height * 100));
+    image.style.setProperty("--zoom-x", `${x}%`);
+    image.style.setProperty("--zoom-y", `${y}%`);
+  });
+  document.addEventListener("pointerout", e => {
+    if (!(e.target instanceof Element)) return;
+    const frame = e.target.closest(".prod-detail__main");
+    if (!frame || (e.relatedTarget instanceof Node && frame.contains(e.relatedTarget))) return;
+    const image = $("img", frame);
+    if (image) {
+      image.style.removeProperty("--zoom-x");
+      image.style.removeProperty("--zoom-y");
+    }
+  });
+
   window.UI = { $, $$, esc, money, img, toast, productCard, productPriceInfo, applySite, setActive, closeMega, closeDrawer: () => openDrawer(false), renderCart };
 })();
 
@@ -1539,6 +1633,20 @@ body.is-admin .product__edit{display:block}
 
   /* ---------- tiện ích ---------- */
   const num = v => Math.max(0, parseInt(String(v).replace(/[^\d]/g, ""), 10) || 0);
+  const formatPrice = value => String(value ?? "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  function bindPriceInput(input) {
+    input.addEventListener("input", () => {
+      const caret = input.selectionStart ?? input.value.length;
+      const digitsBeforeCaret = input.value.slice(0, caret).replace(/[^\d]/g, "").length;
+      input.value = formatPrice(input.value);
+      let nextCaret = 0, digitCount = 0;
+      while (nextCaret < input.value.length && digitCount < digitsBeforeCaret) {
+        if (/\d/.test(input.value[nextCaret])) digitCount++;
+        nextCaret++;
+      }
+      input.setSelectionRange(nextCaret, nextCaret);
+    });
+  }
   function download(name, text, type) {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type: type || "application/json" }));
@@ -1600,8 +1708,8 @@ body.is-admin .product__edit{display:block}
         <label>Dòng chữ nhỏ (nhóm / hãng)<input id="f_line" type="text" value="${esc(p.line || "")}"></label>
       </div>
       <div class="adm-row">
-        <label>Giá bán (đồng, 0 = Liên hệ)<input id="f_price" type="text" inputmode="numeric" value="${p.price || 0}"></label>
-        <label>Giá gốc (0 = không giảm giá)<input id="f_old" type="text" inputmode="numeric" value="${p.oldPrice || 0}"></label>
+        <label>Giá bán (đồng, 0 = Liên hệ)<input id="f_price" type="text" inputmode="numeric" value="${formatPrice(p.price || 0)}"></label>
+        <label>Giá gốc (0 = không giảm giá)<input id="f_old" type="text" inputmode="numeric" value="${formatPrice(p.oldPrice || 0)}"></label>
       </div>
       <section class="adm-variant-set">
         <div class="adm-variant-set__head"><div><h3>Phân loại và giá</h3><p>Không bắt buộc. Thêm một dòng cho mỗi loại sản phẩm.</p></div><button type="button" class="btn-ghost" id="f_addVariant">+ Thêm phân loại</button></div>
@@ -1636,10 +1744,11 @@ body.is-admin .product__edit{display:block}
       $("#f_variants").innerHTML = variants.map((variant, index) => `
         <div class="adm-variant-row" data-variant-id="${esc(variant.id)}">
           <label>Loại ${index + 1}<input type="text" data-variant-name value="${esc(variant.name)}" placeholder="Ví dụ: 7 inch"></label>
-          <label>Giá bán<input type="text" inputmode="numeric" data-variant-price value="${esc(variant.price)}" placeholder="0 = liên hệ"></label>
-          <label>Giá gốc<input type="text" inputmode="numeric" data-variant-old-price value="${esc(variant.oldPrice)}" placeholder="Không bắt buộc"></label>
+          <label>Giá bán<input type="text" inputmode="numeric" data-variant-price value="${esc(formatPrice(variant.price))}" placeholder="0 = liên hệ"></label>
+          <label>Giá gốc<input type="text" inputmode="numeric" data-variant-old-price value="${esc(formatPrice(variant.oldPrice))}" placeholder="Không bắt buộc"></label>
           <button type="button" class="btn-danger" data-remove-variant aria-label="Xóa loại ${index + 1}">Xóa</button>
         </div>`).join("");
+      $$("[data-variant-price], [data-variant-old-price]", $("#f_variants")).forEach(bindPriceInput);
     };
     const readVariants = () => $$("#f_variants .adm-variant-row").map(row => ({
       id: row.dataset.variantId,
@@ -1649,6 +1758,8 @@ body.is-admin .product__edit{display:block}
     }));
     paint();
     renderVariants();
+    bindPriceInput($("#f_price"));
+    bindPriceInput($("#f_old"));
     ov.addEventListener("mousedown", e => { if (e.target === ov) closeModal(); });
     $("#f_cancel").addEventListener("click", closeModal);
     $("#f_clear").addEventListener("click", () => { images = []; $("#f_files").value = ""; paint(); });
