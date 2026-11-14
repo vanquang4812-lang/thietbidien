@@ -13,7 +13,7 @@ Website dùng GitHub Pages để có địa chỉ HTTPS miễn phí; Supabase l�
 insert into public.site_admins (user_id) values ('AUTH-USER-UUID');
 ```
 
-5. Trong **Project Settings > API**, sao chép Project URL và Publishable key (hoặc anon key cũ). Mở `website.html`, tìm `const CLOUD` và điền hai giá trị vào `supabaseUrl` và `publishableKey`.
+5. Trong **Project Settings > API**, sao chép Project URL và Publishable key (hoặc anon key cũ). Mở `data.js`, tìm `const CLOUD` và điền hai giá trị vào `supabaseUrl` và `publishableKey`.
 
 Chỉ dùng Publishable/anon key trong HTML công khai. Không bao giờ đưa `service_role` key vào website hoặc repository.
 
@@ -29,7 +29,7 @@ Dữ liệu trong `file:///` nằm riêng trên trình duyệt hiện tại. Tr�
 ## 3. Xuất bản bằng GitHub Pages
 
 1. Tạo một repository công khai trên GitHub.
-2. Tải lên `index.html`, `website.html`, `SUPABASE_SETUP.sql` và `HUONG_DAN_XUAT_BAN.md`. Nếu website dùng ảnh theo đường dẫn tương đối trong thư mục, tải cả thư mục ảnh lên cùng vị trí.
+2. Tải lên các file `index.html`, `website.html`, `data.js`, `styles.css`, `ui.js`, `pages.js`, `admin.js`, `router.js`, `SUPABASE_SETUP.sql` và `HUONG_DAN_XUAT_BAN.md` vào cùng thư mục gốc của repository. Nếu website dùng ảnh theo đường dẫn tương đối trong thư mục, tải cả thư mục ảnh lên cùng vị trí.
 3. Trong repository, mở **Settings > Pages**. Chọn **Deploy from a branch**, nhánh `main`, thư mục `/(root)`, rồi lưu.
 4. Sau khi GitHub Pages báo xuất bản xong, mở URL GitHub Pages. `index.html` sẽ chuyển tiếp vào website và giữ nguyên đường dẫn sản phẩm trong hash.
 5. Gửi URL HTTPS đó qua Zalo. Không gửi đường dẫn `file:///`.
